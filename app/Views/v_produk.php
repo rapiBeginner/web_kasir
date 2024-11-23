@@ -23,11 +23,12 @@
                 <table class="table table-bordered table-striped" id="produkTable">
                     <thead>
                         <tr>
-                            <th class="col-2">NO</th>
-                            <th class="col-4">Nama Produk</th>
-                            <th class="col-2">Harga</th>
-                            <th class="col-2">Stok</th>
-                            <th class="col-2">Action</th>
+                            <th class="col-1 text-center align-middle">NO</th>
+                            <th class="col-3 text-center align-middle">Nama Produk</th>
+                            <th class="col-2 text-center align-middle">Harga</th>
+                            <th class="col-1 text-center align-middle">Stok</th>
+                            <th class="col-3 text-center align-middle">Gambar</th>
+                            <th class="col-2 text-center align-middle">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,19 +54,25 @@
                         <div class="row mb-3">
                             <label class="col-sm-4 col-form-label">Nama Produk</label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" id="NamaProduk">
+                                <input required type="text" class="form-control" id="NamaProduk">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label class="col-sm-4 col-form-label">Harga</label>
                             <div class="col-sm-8">
-                                <input type="number" class="form-control" id="HargaProduk">
+                                <input required type="number" class="form-control" id="HargaProduk">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label class="col-sm-4 col-form-label">Stok</label>
                             <div class="col-sm-8">
-                                <input type="number" class="form-control" id="StokProduk">
+                                <input required type="number" class="form-control" id="StokProduk">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-4 col-form-label">Gambar</label>
+                            <div class="col-sm-8">
+                                <input required type="file" class="form-control" id="GambarProduk">
                             </div>
                         </div>
                         <button type="button" class="btn btn-primary float-end" id="simpanProduk">Simpan</button>
@@ -89,25 +96,30 @@
                         <div class="row mb-3">
                             <label class="col-sm-4 col-form-label">Nama Produk</label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" id="NamaProdukEdit">
+                                <input required type="text" class="form-control" id="NamaProdukEdit">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label class="col-sm-4 col-form-label">Harga</label>
                             <div class="col-sm-8">
-                                <input type="number" class="form-control" id="HargaProdukEdit">
+                                <input required type="number" class="form-control" id="HargaProdukEdit">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label class="col-sm-4 col-form-label">Stok</label>
                             <div class="col-sm-8">
-                                <input type="number" class="form-control" id="StokProdukEdit">
+                                <input required type="number" class="form-control" id="StokProdukEdit">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-4 col-form-label">Gambar <div style="font-size: 12px;">(Kosongkan jika tidak ingin mengubah gambar)</div></label>
+                            <div class="col-sm-8">
+                                <input required type="file" class="form-control" id="GambarProdukEdit" aria-label="Upload">
                             </div>
                         </div>
                         <button type="button" class="btn btn-primary float-end" id="EditProduk">Simpan</button>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
@@ -115,76 +127,104 @@
 
     <script src="<?= base_url('assets/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js') ?>"></script>
     <script src="<?= base_url('assets/fontawesome-free-6.6.0-web/js/all.min.js') ?>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function tampil() {
-            $.ajax({
-                url: '<?= base_url('produk/tampil') ?>',
-                type: 'GET',
-                dataType: 'json',
-                success: function(hasil) {
-                    if (hasil.status == 'success') {
-                        console.log(hasil);
-                        var produkTabel = $('#produkTable tbody')
-                        produkTabel.empty()
-                        var produk = hasil.produk
-                        var no = 1
-                        produk.forEach(function(item) {
-                            var row = '<tr>' +
-                                '<td>' + no + '</td>' +
-                                '<td>' + item.nama_produk + '</td>' +
-                                '<td>' + item.harga + '</td>' +
-                                '<td>' + item.stok + '</td>' +
-                                '<td>' +
-                                '<button class="btn btn-warning btn-sm editProduk" data-id="' + item.produk_id + '" data-bs-toggle="modal" data-bs-target="#modalEdit"><i class="fa-solid fa-pencil"></i> Edit</button>' +
-                                '<button class="btn btn-danger btn-sm hapusProduk ms-2" data-id="' + item.produk_id + '"><i class="fa-solid fa-trash"></i> Hapus</button>' +
-                                '</td>' +
-                                '</td>'
-                            produkTabel.append(row)
-                            no++
-                        })
-                    } else {
-                        alert(alert('Gagal mengambil data'))
-                    }
-                },
-                error: function(xhr, status, error) {
-                    alert('Terjadi kesalahan: ' + error);
-                }
-            })
-        }
-
         $(document).ready(function() {
-            tampil()
-            $('#simpanProduk').on('click', function() {
+            function tampil() {
                 $.ajax({
-                    url: '<?= base_url('produk/tambah') ?>',
-                    type: "POST",
-                    data: {
-                        nama_produk: $('#NamaProduk').val(),
-                        harga: $('#HargaProduk').val(),
-                        stok: $('#StokProduk').val(),
-                    },
+                    url: '<?= base_url('produk/tampil') ?>',
+                    type: 'GET',
                     dataType: 'json',
                     success: function(hasil) {
-                        if (hasil.status === 'success') {
-                            $('#modalTambah').modal('hide');
-                            $('#formTambah')[0].reset()
-                            tampil()
+                        if (hasil.status == 'success') {
+                            var produkTabel = $('#produkTable tbody')
+                            produkTabel.empty()
+                            var produk = hasil.produk
+                            var no = 1
+                            produk.forEach(function(item) {
+                                var row = '<tr>' +
+                                    '<td class="text-center align-middle">' + no + '</td>' +
+                                    '<td class="text-center align-middle">' + item.nama_produk + '</td>' +
+                                    '<td class="text-center align-middle">' + item.harga + '</td>' +
+                                    '<td class="text-center align-middle">' + item.stok + '</td>' +
+                                    '<td class="text-center align-middle">' + '<img src="<?= base_url() ?>uploads/' + item.gambar + '" alt="" width=50px>' + '</td>' +
+                                    '<td class="text-center align-middle">' +
+                                    '<button class="btn btn-warning btn-sm editProduk" data-id="' + item.produk_id + '" data-bs-toggle="modal" data-bs-target="#modalEdit"><i class="fa-solid fa-pencil"></i> Edit</button>' +
+                                    '<button class="btn btn-danger btn-sm hapusProduk ms-2" data-id="' + item.produk_id + '"><i class="fa-solid fa-trash"></i> Hapus</button>' +
+                                    '</td>' +
+                                    '</td>' + '</tr>'
+
+                                produkTabel.append(row)
+                                no++
+                            })
                         } else {
-                            alert('Gagal menyimpan data: ' + JSON.stringify(hasil.errors))
+                            alert(alert('Gagal mengambil data'))
                         }
                     },
                     error: function(xhr, status, error) {
-                        alert('Terjadi kesalahan:' + error)
+                        alert('Terjadi kesalahan: ' + error);
                     }
+                })
+            }
 
+            tampil()
+            $('#simpanProduk').on('click', function() {
+                var formData = new FormData();
+                formData.append('nama_produk', $('#NamaProduk').val());
+                formData.append('harga', $('#HargaProduk').val());
+                formData.append('stok', $('#StokProduk').val());
+                formData.append('gambar', $('#GambarProduk')[0].files[0]);
+                Swal.fire({
+                    title: "Tambahkan data?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya"
+                }).then((result) => {
+                    $.ajax({
+                        url: '<?= base_url('produk/tambah') ?>',
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        dataType: 'json',
+                        success: function(hasil) {
+                            console.log("gambar: " + hasil.gambar);
+                            if (hasil.status === 'success') {
+                                Swal.fire({
+                                    title: "Data berhasil ditambahkan",
+                                    icon: "success"
+                                });
+                                $('#modalTambah').modal('hide');
+                                $('#formTambah')[0].reset()
+                                tampil()
+                            } else {
+                                Swal.fire({
+                                    title: "Gagal menambahkan data: " + JSON.stringify(hasil.errors),
+                                    icon: "success"
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Terjadi kesalahan:' + error)
+                        }
+
+                    })
                 })
             })
 
             $('#produkTable').on('click', '.hapusProduk', function() {
                 var nomor = $(this).closest('tr').find('td:first').text()
                 var id = $(this).attr('data-id')
-                console.log(id);
-                if (confirm(`Hapus data nomor ${nomor} ?`)) {
+                Swal.fire({
+                    title: `Yakin hapus data nomor ${nomor}?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Ya"
+                }).then((result) => {
 
                     $.ajax({
                         url: '<?= base_url('produk/hapus') ?>',
@@ -195,7 +235,10 @@
                         },
                         success: function(hasil) {
                             tampil()
-                            alert(hasil.message)
+                            Swal.fire({
+                                title: hasil.message,
+                                icon: 'success'
+                            })
                         },
                         error: function(xhr, status, error) {
                             console.log('pessan error ' + error);
@@ -203,7 +246,7 @@
                         }
 
                     })
-                }
+                })
             })
 
             $('#produkTable').on('click', '.editProduk', function() {
@@ -212,26 +255,46 @@
                 document.getElementById('StokProdukEdit').value = $(this).closest('tr').find('td:eq(3)').text()
                 var id = $(this).attr('data-id')
                 $('#EditProduk').off('click').on('click', function() {
-                    if (confirm('Simpan perubahan data?')) {
+                    var formData = new FormData();
+                    formData.append('produk_id', id)
+                    formData.append('nama_produk', $('#NamaProdukEdit').val())
+                    formData.append('harga', $('#HargaProdukEdit').val())
+                    formData.append('stok', $('#StokProdukEdit').val())
+                    if ($('#GambarProdukEdit')[0].files[0]) {
+                        formData.append('gambar', $('#GambarProdukEdit')[0].files[0])
+                    }
+
+
+                    Swal.fire({
+                        title: `Simpan perubahan?`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Ya"
+                    }).then((result) => {
                         $.ajax({
                             url: '<?= base_url('produk/edit') ?>',
                             type: 'POST',
+                            processData: false,
+                            contentType: false,
                             dataType: 'json',
-                            data: {
-                                'produk_id': id,
-                                'nama_produk': document.getElementById('NamaProdukEdit').value,
-                                'harga': document.getElementById('HargaProdukEdit').value,
-                                'stok': document.getElementById('StokProdukEdit').value
-                            },
+                            data: formData,
                             success: function(hasil) {
+                                Swal.fire({
+                                    title:hasil.message,
+                                    icon:"success"
+                                })
                                 $('#modalEdit').modal('hide')
                                 tampil()
+                                
+
                             },
                             error: function(xhr, status, error) {
                                 console.log('Error: ' + error);
                             }
                         })
-                    }
+                    })
                 })
             })
 
